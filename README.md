@@ -6,7 +6,7 @@ O objetivo é **coletar e analisar dados dos 1.000 repositórios com maior núme
 
 > A [especificação oficial do laboratório](docs/especificacao.pdf) está em `docs/especificacao.pdf`.
 >
-> Para uma explicação dos principais termos e jargões usados na especificação, consulte o [glossário de conceitos](docs/glossario-e-conceitos.md).
+> Para uma explicação dos principais termos e jargões, consulte o [glossário](wiki/Glossário.md) na Wiki. Mais documentação (como executar, Sprint 1) está em [wiki/](wiki/Home.md).
 
 ## Questões de pesquisa (RQs) e métricas
 
