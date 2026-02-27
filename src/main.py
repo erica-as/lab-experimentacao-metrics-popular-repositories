@@ -6,7 +6,7 @@ from typing import List, Dict, Any, Optional
 import requests
 from dotenv import load_dotenv
 
-# Configuração  
+# --- Configuração Inicial ---
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 TOKEN = os.getenv("GITHUB_TOKEN")
@@ -16,64 +16,74 @@ URL = "https://api.github.com/graphql"
 if not TOKEN:
     raise ValueError("GITHUB_TOKEN não encontrado. Verifique seu arquivo .env.")
 
-def fetch_sprint_1(max_retries: int = 5, total: int = 20, batch_size: int = 5) -> Optional[List[Dict[str, Any]]]:
-    """
-    Executa a coleta da Sprint 1 em batches menores (paginados) e armazena resultados
-    em memória à medida que cada batch é bem-sucedido. Cada batch tem retries
-    independentes para lidar com 502/503/504 sem perder os dados já coletados.
+# --- Query ---
+# Uma única query GraphQL parametrizada por intervalo de estrelas.
+# Cada requisição busca 10 repositórios dentro de um range específico
+# (sem cursor/paginação). 10 requisições × 10 repos = 100 no total.
+QUERY = """
+{{
+  search(query: "stars:{star_filter} sort:stars-desc", type: REPOSITORY, first: 10) {{
+    nodes {{
+      ... on Repository {{
+        nameWithOwner
+        createdAt
+        stargazerCount
+        pullRequests(states: MERGED) {{ totalCount }}
+        releases {{ totalCount }}
+        updatedAt
+        primaryLanguage {{ name }}
+        issues {{ totalCount }}
+        closedIssues: issues(states: CLOSED) {{ totalCount }}
+      }}
+    }}
+  }}
+}}
+"""
 
-    Parâmetros:
-    - max_retries: número máximo de tentativas por batch
-    - total: número total de repositórios desejados
-    - batch_size: quantos repositórios pedir por requisição
-    """
-    if batch_size <= 0 or total <= 0:
-        raise ValueError("'total' e 'batch_size' devem ser inteiros positivos")
+# 10 intervalos não sobrepostos cobrindo repositórios com mais de 10k estrelas.
+# Cada intervalo alimenta uma requisição independente.
+# Intervalos ordenados do maior para o menor.
+# O primeiro range usa >=100000 para garantir >=10 resultados no topo
+# (repos acima de 200k são poucos e retornariam menos de 10).
+STAR_RANGES = [
+    ">=100000",
+    "70000..99999",
+    "50000..69999",
+    "40000..49999",
+    "30000..39999",
+    "25000..29999",
+    "20000..24999",
+    "15000..19999",
+    "12000..14999",
+    "10000..11999",
+]
 
-    print(f"Iniciando coleta da Sprint 1 em batches ({batch_size} por requisição) até {total} repositórios.")
 
-    # Query parametrizada para paginação (cursor-based)
-    QUERY = """
-    query($first: Int!, $after: String) {
-      search(query: "stars:>10000 sort:stars-desc", type: REPOSITORY, first: $first, after: $after) {
-        pageInfo { endCursor hasNextPage }
-        nodes {
-          ... on Repository {
-            nameWithOwner
-            createdAt
-            stargazerCount
-            pullRequests(states: MERGED) { totalCount }
-            releases { totalCount }
-            updatedAt
-            primaryLanguage { name }
-            issues { totalCount }
-            closedIssues: issues(states: CLOSED) { totalCount }
-          }
-        }
-      }
-    }
+def fetch_sprint_1(max_retries: int = 5) -> Optional[List[Dict[str, Any]]]:
     """
+    Faz 10 requisições sequenciais e independentes à API GraphQL do GitHub,
+    cada uma filtrando um intervalo de estrelas diferente (sem usar paginação).
+    Os resultados são acumulados em memória. Cada requisição tem retry próprio
+    com backoff exponencial para lidar com erros 502/503/504.
+    """
+    print(f"Iniciando coleta da Sprint 1 — {len(STAR_RANGES)} requisições sequenciais, 10 repos cada...")
 
     collected: List[Dict[str, Any]] = []
-    failed_batches: List[Dict[str, Any]] = []  # guarda info de batches que falharam
 
     with requests.Session() as session:
         session.headers.update({"Authorization": f"Bearer {TOKEN}"})
 
-        cursor = None
-        while len(collected) < total:
-            need = min(batch_size, total - len(collected))
+        for i, star_filter in enumerate(STAR_RANGES, start=1):
+            query = QUERY.format(star_filter=star_filter)
+            print(f"\n[{i}/{len(STAR_RANGES)}] Buscando repos com stars:{star_filter}...")
 
-            # tenta o batch com retries locais
-            success = False
             for attempt in range(max_retries):
                 try:
-                    payload = {"query": QUERY, "variables": {"first": need, "after": cursor}}
-                    response = session.post(URL, json=payload, timeout=45)
+                    response = session.post(URL, json={"query": query}, timeout=45)
 
                     if response.status_code in (502, 503, 504):
                         wait_time = 2 ** attempt
-                        print(f"Erro {response.status_code} no servidor. Tentativa {attempt + 1}/{max_retries}. Aguardando {wait_time}s...")
+                        print(f"  Erro {response.status_code}. Tentativa {attempt + 1}/{max_retries}. Aguardando {wait_time}s...")
                         time.sleep(wait_time)
                         continue
 
@@ -81,91 +91,30 @@ def fetch_sprint_1(max_retries: int = 5, total: int = 20, batch_size: int = 5) -
                     data = response.json()
 
                     if "errors" in data:
-                        print(f"Erro na Query: {data['errors'][0]['message']}")
-                        # Não faz sentido tentar novamente se a query está inválida
-                        return None
+                        print(f"  Erro na Query: {data['errors'][0]['message']}")
+                        break  # erro de query não adianta repetir
 
-                    search = data.get("data", {}).get("search", {})
-                    nodes = search.get("nodes", [])
-                    page_info = search.get("pageInfo", {})
-
+                    nodes = data.get("data", {}).get("search", {}).get("nodes", [])
                     collected.extend(nodes)
-                    cursor = page_info.get("endCursor")
-                    has_next = page_info.get("hasNextPage", False)
-
-                    print(f"Batch recebido: {len(nodes)} itens (total coletado: {len(collected)}/{total})")
-
-                    success = True
-                    # se não há próxima página, interrompe o laço externo
-                    if not has_next:
-                        print("Sem mais páginas disponíveis na pesquisa.")
-                        break
-                    # avança para próximo batch
+                    print(f"  Recebidos: {len(nodes)} repos (total em memória: {len(collected)})")
                     break
 
                 except requests.RequestException as e:
-                    print(f"Erro de rede/timeout no batch: {e}")
+                    print(f"  Erro de rede: {e}")
                     if attempt < max_retries - 1:
                         time.sleep(2 ** attempt)
                         continue
-                    # falhou definitivamente este batch
-                    print("Falha definitiva neste batch após múltiplas tentativas. Registrando para possível retry posterior.")
-                    failed_batches.append({"cursor": cursor, "size": need})
+                    print(f"  Falha definitiva neste intervalo após {max_retries} tentativas.")
 
-            if not success and not cursor:
-                # se falhou no primeiro batch e não há cursor para avançar, aborta
-                print("Não foi possível completar o primeiro batch. Abortando.")
-                break
+    print(f"\nColeta finalizada: {len(collected)} repositórios coletados.")
+    return collected
 
-            # segurança: se não houver cursor (ex.: fim), interrompe
-            if cursor is None:
-                break
-
-        # Tenta reprocessar batches que falharam (uma rodada simples)
-        if failed_batches:
-            print(f"Tentando reprocessar {len(failed_batches)} batch(es) que falharam...")
-            remaining_failures: List[Dict[str, Any]] = []
-            for fb in failed_batches:
-                c = fb["cursor"]
-                need = fb["size"]
-                retry_success = False
-                for attempt in range(max_retries):
-                    try:
-                        payload = {"query": QUERY, "variables": {"first": need, "after": c}}
-                        response = session.post(URL, json=payload, timeout=45)
-                        if response.status_code in (502, 503, 504):
-                            time.sleep(2 ** attempt)
-                            continue
-                        response.raise_for_status()
-                        data = response.json()
-                        if "errors" in data:
-                            print(f"Erro na Query ao reprocessar: {data['errors'][0]['message']}")
-                            break
-                        nodes = data.get("data", {}).get("search", {}).get("nodes", [])
-                        collected.extend(nodes)
-                        retry_success = True
-                        print(f"Reprocessado com sucesso batch com cursor {c} ({len(nodes)} itens)")
-                        break
-                    except requests.RequestException as e:
-                        if attempt < max_retries - 1:
-                            time.sleep(2 ** attempt)
-                            continue
-                        print(f"Reprocessamento falhou para cursor {c}: {e}")
-                if not retry_success:
-                    remaining_failures.append(fb)
-
-            if remaining_failures:
-                print(f"Ainda restaram {len(remaining_failures)} batch(es) falhados. Prosseguindo com os resultados coletados.")
-
-    # garante que não retornamos mais que o solicitado
-    result = collected[:total]
-    return result
 
 if __name__ == "__main__":
-    # pedir 100 repositórios no total, em batches de 5
-    repositorios = fetch_sprint_1(total=100, batch_size=5)
-    
+    repositorios = fetch_sprint_1()
+
     if repositorios:
-        print("\nAmostra dos resultados:")
-        for repo in repositorios[:100]:
+        repositorios_ordenados = sorted(repositorios, key=lambda r: r['stargazerCount'], reverse=True)
+        print("\nResultados (ordem decrescente de estrelas):")
+        for repo in repositorios_ordenados:
             print(f"- {repo['nameWithOwner']} ({repo['stargazerCount']} estrelas)")
