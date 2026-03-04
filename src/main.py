@@ -65,7 +65,7 @@ STAR_RANGES = [
 # Inclui rateLimit para detectar e respeitar limites da API.
 QUERY_PAGINATED = """
 query($cursor: String) {
-  search(query: "stars:>1000 sort:stars-desc", type: REPOSITORY, first: 100, after: $cursor) {
+  search(query: "stars:>1000 sort:stars-desc", type: REPOSITORY, first: 10, after: $cursor) {
     pageInfo {
       endCursor
       hasNextPage
@@ -143,7 +143,7 @@ def fetch_sprint_1(max_retries: int = 5) -> Optional[List[Dict[str, Any]]]:
     return collected
 
 
-def fetch_sprint_2(total: int = 1000, page_size: int = 100, max_retries: int = 5) -> Optional[List[Dict[str, Any]]]:
+def fetch_sprint_2(total: int = 1000, page_size: int = 10, max_retries: int = 5) -> Optional[List[Dict[str, Any]]]:
     """
     Faz requisições paginadas à API GraphQL do GitHub usando cursor/endCursor,
     acumulando resultados em lotes de `page_size` até atingir `total` repositórios.
