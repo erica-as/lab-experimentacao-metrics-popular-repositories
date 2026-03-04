@@ -121,3 +121,8 @@ Nada é instalado sozinho: você roda os comandos acima no terminal.
 - **`.venv/bin/python src/main.py`** — Usa o Python do venv (que já tem as libs). O script carrega o `.env`, monta a query GraphQL e envia o POST para a API.
 
 **Resumo:** use sempre os binários dentro de `.venv` (`.venv/bin/python` e `.venv/bin/pip`). Assim as dependências ficam só neste projeto.
+
+## Autores
+
+- [@erica-as](https://github.com/erica-as)
+- [@gustavo-po](https://github.com/gustavo-po)
