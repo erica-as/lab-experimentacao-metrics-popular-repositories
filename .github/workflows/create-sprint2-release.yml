@@ -1,0 +1,54 @@
+name: Create Sprint 2 Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Sprint 2 Release (v0.3.0)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view v0.3.0 --repo "$GITHUB_REPOSITORY" &>/dev/null; then
+            echo "Release v0.3.0 already exists, skipping."
+          else
+            gh release create v0.3.0 \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "Sprint 2 (Lab01S02)" \
+              --target 4ee0e39db4401c5f876ec389b1373c438362ca1a \
+              --notes "## Sprint 2 (Lab01S02) – Entrega
+
+Paginação GraphQL para coleta de 1.000 repositórios + exportação CSV + primeira versão do relatório com hipóteses.
+
+### Incluído nesta release
+
+- **Paginação via cursor** (\`QUERY_PAGINATED\`): função \`fetch_sprint_2\` com \`endCursor\` para coletar 1.000 repositórios em lotes de 10, com tratamento de rate limit e backoff exponencial.
+- **Exportação CSV**: função \`save_to_csv\` persiste os dados coletados em \`data/repos.csv\` com todas as métricas das RQs.
+- **Dados coletados**: \`data/repos.csv\` com os 1.000 repositórios mais estrelados.
+- **Relatório inicial** \`docs/relatorio.md\`: introdução, metodologia, hipóteses informais para RQ01–RQ06 e RQ07 (bônus).
+
+### Como usar
+
+\`\`\`bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+# Configurar .env com GITHUB_TOKEN
+.venv/bin/python src/main.py
+\`\`\`
+
+O script executa \`fetch_sprint_2()\` por padrão, coletando 1.000 repositórios e salvando em \`data/repos.csv\`.
+
+### Próximos passos (Sprint 3 / Lab01S03)
+
+- Análise estatística dos dados (medianas, distribuições)
+- Visualizações gráficas
+- Relatório final com resultados e discussão"
+          fi
