@@ -7,7 +7,7 @@
 
 ## 1. Introdução
 
-Este relatório apresenta a análise dos **1.000 repositórios com maior número de estrelas no GitHub**, coletados via API GraphQL. O objetivo é investigar características comuns a sistemas populares — como maturidade, frequência de contribuições, lançamento de releases, atualização, linguagem de programação e gestão de issues — e relacioná-las com o sucesso medido pela popularidade (estrelas).
+Este relatório apresenta a análise dos **1.000 repositórios com maior número de estrelas no GitHub**, coletados via API GraphQL. O objetivo é investigar características comuns a sistemas populares, como maturidade, frequência de contribuições, lançamento de releases, atualização, linguagem de programação e gestão de issues e relacioná-las com o sucesso medido pela popularidade (estrelas).
 
 As seções a seguir apresentam hipóteses informais para cada questão de pesquisa (RQ), que serão validadas ou refutadas com base nos dados coletados.
 
@@ -73,7 +73,7 @@ Os dados foram persistidos em `data/repos.csv`. A análise será realizada com b
 
 **Métrica:** Linguagem primária (`primaryLanguage`) de cada repositório.
 
-**Hipótese:** Espera-se que linguagens amplamente adotadas no mercado — como **JavaScript**, **Python**, **TypeScript** e **Java** — dominem entre os repositórios mais populares. Isso se deve tanto à maior base de usuários dessas linguagens quanto ao fato de que projetos nessas tecnologias tendem a resolver problemas mais comuns e acessíveis a um público maior.
+**Hipótese:** Espera-se que linguagens amplamente adotadas no mercado, como **JavaScript**, **Python**, **TypeScript** e **Java**, dominem entre os repositórios mais populares. Isso se deve tanto à maior base de usuários dessas linguagens quanto ao fato de que projetos nessas tecnologias tendem a resolver problemas mais comuns e acessíveis a um público maior.
 
 ---
 
