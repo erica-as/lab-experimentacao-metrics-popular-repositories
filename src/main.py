@@ -8,7 +8,6 @@ from typing import List, Dict, Any, Optional
 import requests
 from dotenv import load_dotenv
 
-# --- Configuração Inicial ---
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 TOKEN = os.getenv("GITHUB_TOKEN")
@@ -125,7 +124,7 @@ def fetch_sprint_1(max_retries: int = 5) -> Optional[List[Dict[str, Any]]]:
 
                     if "errors" in data:
                         print(f"  Erro na Query: {data['errors'][0]['message']}")
-                        break  # erro de query não adianta repetir
+                        break 
 
                     nodes = data.get("data", {}).get("search", {}).get("nodes", [])
                     collected.extend(nodes)
@@ -185,7 +184,6 @@ def fetch_sprint_2(total: int = 1000, page_size: int = 10, max_retries: int = 5)
                     nodes = search.get("nodes", [])
                     page_info = search.get("pageInfo", {})
 
-                    # Verifica e respeita o rate limit da API
                     rate_limit = data.get("data", {}).get("rateLimit", {})
                     remaining = rate_limit.get("remaining")
                     reset_at = rate_limit.get("resetAt")
@@ -196,7 +194,6 @@ def fetch_sprint_2(total: int = 1000, page_size: int = 10, max_retries: int = 5)
                             print(f"  Rate limit quase esgotado ({remaining} restantes). Aguardando {wait_seconds:.0f}s até reset...")
                             time.sleep(wait_seconds + 1)
 
-                    # Acumula apenas o necessário para não ultrapassar `total`
                     slots_left = total - len(collected)
                     collected.extend(nodes[:slots_left])
                     print(f"  Recebidos: {len(nodes)} repos (total em memória: {len(collected)})")
@@ -207,7 +204,7 @@ def fetch_sprint_2(total: int = 1000, page_size: int = 10, max_retries: int = 5)
                         return collected
 
                     cursor = page_info.get("endCursor")
-                    break  # página obtida com sucesso; avança para a próxima
+                    break  
 
                 except requests.RequestException as e:
                     print(f"  Erro de rede: {e}")
