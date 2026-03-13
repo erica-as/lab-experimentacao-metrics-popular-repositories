@@ -101,3 +101,167 @@ Na próxima etapa (Lab01S03), serão realizadas:
 - Criação de visualizações gráficas para apoiar a discussão.
 - Comparação dos resultados com as hipóteses levantadas neste documento.
 - Elaboração da versão final do relatório com conclusões e discussão completa.
+
+---
+
+## 5. Resultados da Análise (Lab01S03)
+
+Nesta seção apresentamos os resultados resumidos obtidos a partir da análise dos dados coletados e as visualizações geradas.
+
+**Resumo rápido (medianas):**
+
+- **Mediana de idade (anos):** 8.38
+- **Mediana de PRs mescladas:** 743
+- **Mediana de releases:** 40
+- **Mediana de dias desde última atualização:** 6
+- **Mediana do percentual de issues fechadas:** 88.0%
+
+As figuras a seguir foram geradas automaticamente pelo script de análise e estão salvas em `docs/figures/`.
+
+### Figuras
+
+![Distribuição de idade dos repositórios](figures/age_hist.png)
+
+![Tempo desde última atualização](figures/updated_days_hist.png)
+
+![Top 10 linguagens primárias](figures/top_languages.png)
+
+![Distribuição do percentual de issues fechadas](figures/issues_closed_ratio_hist.png)
+
+![Estrelas vs PRs mescladas](figures/stars_vs_prs.png)
+
+---
+
+Para reproduzir localmente e gerar as figuras execute:
+
+```bash
+python -m pip install -r requirements.txt
+python src/analysis.py
+```
+
+Os resultados numéricos podem então ser colados nesta seção para completar as discussões das RQs e validar as hipóteses apresentadas nas seções anteriores.
+
+### 5.1 RQ01 — Sistemas populares são maduros/antigos?
+
+- Hipótese informal: repositórios populares tendem a ser relativamente antigos (mediana > 5 anos).
+- Métrica: idade em anos a partir de `createdAt`.
+- Resultado (mediana): **8.38 anos**.
+
+Discussão: a mediana de 8.38 anos confirma a hipótese — a maioria dos projetos no top 1000 tem existência consolidada. Isso é coerente com a ideia de que tempo e acumulação de comunidade contribuem para o acúmulo de estrelas.
+
+![Distribuição de idade dos repositórios](figures/age_hist.png)
+
+Figura: distribuição de idade dos repositórios (anos).
+
+### 5.2 RQ02 — Sistemas populares recebem muita contribuição externa?
+
+- Hipótese informal: projetos populares recebem muitas pull requests mescladas.
+- Métrica: total de PRs com estado `MERGED` (mediana).
+- Resultado (mediana): **743 PRs mescladas**.
+
+Discussão: a mediana alta (743) indica que muitos repositórios recebem volume substancial de contribuições. Observa-se, porém, variabilidade grande: projetos do tipo "listas" têm PRs baixos, enquanto bibliotecas/infraestrutura e grandes frameworks apresentam milhares de PRs.
+
+![Estrelas vs PRs mescladas](figures/stars_vs_prs.png)
+
+Figura: relação entre número de estrelas e PRs mescladas (escala log).
+
+### 5.3 RQ03 — Sistemas populares lançam releases com frequência?
+
+- Hipótese informal: projetos ativos possuem várias releases; listas/documentação podem ter poucas.
+- Métrica: total de releases (mediana).
+- Resultado (mediana): **40 releases**.
+
+Discussão: mediana de 40 indica uso razoável de releases no conjunto. A presença de muitos repositórios do tipo documentação/coleção (que podem ter 0 releases) reduz porém a mediana relativa ao subconjunto de bibliotecas ativas.
+
+![Mediana de releases por linguagem (top 10)](figures/median_releases_by_language.png)
+
+Figura: mediana de releases por linguagem (top 10).
+
+### 5.4 RQ04 — Sistemas populares são atualizados com frequência?
+
+- Hipótese informal: repositórios populares são atualizados frequentemente (mediana de dias baixa).
+- Métrica: dias desde `updatedAt` (mediana).
+- Resultado (mediana): **6 dias**.
+
+Discussão: mediana de 6 dias confirma que, no agregado, esses projetos são atualizados frequentemente — muitos projetos no top 1000 recebem atualizações contínuas.
+
+![Tempo desde última atualização](figures/updated_days_hist.png)
+
+Figura: distribuição do tempo desde a última atualização (dias).
+
+### 5.5 RQ06 — Sistemas possuem alto percentual de issues fechadas?
+
+- Hipótese informal: taxa de issues fechadas é alta (mediana > 70%).
+- Métrica: `issuesClosed` / `issuesTotal` (mediana percentual).
+- Resultado (mediana): **88.0%**.
+
+Discussão: a mediana de 88% sustenta a hipótese: repositórios populares tendem a fechar a maioria das issues, sinalizando manutenção ativa e gestão de backlog.
+
+![Distribuição do percentual de issues fechadas](figures/issues_closed_ratio_hist.png)
+
+Figura: percentual de issues fechadas (histograma).
+
+### 5.6 Contagem por categoria — Linguagens primárias
+
+A tabela a seguir mostra as 10 linguagens primárias mais frequentes no conjunto (contagem) com medianas de PRs, releases, dias desde atualização e estrelas (valores mediana):
+
+| Linguagem | Count | Mediana PRs | Mediana Releases | Mediana dias desde atualização | Mediana Estrelas |
+|---:|---:|---:|---:|---:|---:|
+| Python | 201 | 621 | 23 | 6 | 42778 |
+| TypeScript | 160 | 2588 | 158 | 6 | 42240.5 |
+| JavaScript | 114 | 589.5 | 40.5 | 6 | 45013.5 |
+| Unknown | 96 | 129 | 0 | 6 | 47529 |
+| Go | 76 | 1508 | 131 | 6 | 39849 |
+| Rust | 54 | 2371 | 76 | 6 | 41501.5 |
+| Java | 47 | 605 | 42 | 6 | 37352 |
+| C++ | 46 | 982.5 | 63.5 | 6 | 39746 |
+| C | 25 | 145 | 39 | 6 | 34965 |
+| Jupyter Notebook | 23 | 88 | 0 | 6 | 45862 |
+
+Os dados completos por linguagem foram salvos em `docs/figures/language_summary.csv` e figuras comparativas em `docs/figures/`.
+
+### 5.7 RQ07 (Bônus) — Linguagem influencia contribuição, releases e atualizações?
+
+- Pergunta: sistemas escritos em linguagens populares (ex.: JavaScript, Python, TypeScript, Java) recebem mais contribuição externa, lançam mais releases e são atualizados mais frequentemente?
+
+- Observação geral: utilizamos os mesmos indicadores (medianas por linguagem) e comparamos as linguagens mais frequentes com a mediana global.
+
+- Comparação (medianas globais vs por linguagem):
+
+- Mediana global de PRs: 743
+	- `TypeScript`: **2588** (muito acima da mediana global)
+	- `Rust`: **2371** (muito acima)
+	- `C#` / `PHP` / `Zig` / `Julia` (valores extremos em alguns casos — ver CSV)
+	- `Python`: **621** (ligeiramente abaixo da mediana global)
+	- `JavaScript`: **589.5** (abaixo da mediana global)
+
+- Mediana global de releases: 40
+	- `TypeScript`: **158** (bem acima)
+	- `Go`: **131** (acima)
+	- `Python`: **23** (abaixo)
+	- `JavaScript`: **40.5** (próximo da mediana)
+
+- Mediana global de dias desde atualização: 6 (praticamente todas as linguagens apresentam mediana 6)
+
+Discussão: os resultados mostram que **TypeScript** e algumas outras linguagens (ex.: Rust, Go, C# em alguns casos) apresentam medianas de PRs e releases consideravelmente maiores que a mediana global — indicando maior atividade e uso do fluxo de contribuição/release nesses ecossistemas. Por outro lado, **Python** e **JavaScript**, apesar de serem muito frequentes (maior número de repositórios), têm mediana de PRs e releases próximas ou abaixo da mediana global; isso pode ser explicado pela presença massiva de repositórios do tipo "lista", conteúdo educativo ou documentação (com muitas estrelas mas menos PRs/release) nessas linguagens.
+
+As figuras a seguir detalham a comparação por linguagem (top 10):
+
+![Mediana de PRs por linguagem (top 10)](figures/median_prs_by_language.png)
+
+Figura: mediana de PRs mescladas por linguagem (top 10).
+
+![Mediana de dias desde atualização por linguagem (top 10)](figures/median_update_days_by_language.png)
+
+Figura: mediana de dias desde última atualização por linguagem (top 10).
+
+Conclusão do bônus: há evidências parciais de que a linguagem está associada à intensidade de contribuição e ao uso de releases — linguagens com ecossistemas orientados a bibliotecas e tooling (por exemplo TypeScript) tendem a registrar medianas maiores de PRs e releases. Entretanto, a relação não é universal: é preciso controlar o tipo de projeto (biblioteca vs lista/tutorial vs app) para conclusões causais.
+
+---
+
+## 6. Conclusões e próximos passos
+
+- O conjunto analisado (top 1000) tende a ser maduro, ativo e com alta taxa de fechamento de issues.
+- Há diferenças por linguagem: algumas linguagens apresentam medianas mais altas de PRs e releases, sugerindo ecossistemas com mais contribuição externa e versionamento via releases.
+- Próximos passos recomendados: segmentar por tipo de repositório (biblioteca, framework, lista, tutorial), realizar testes estatísticos para comparar distribuições entre linguagens e criar visualizações adicionais que controlem por idade e tipo de projeto.
+
