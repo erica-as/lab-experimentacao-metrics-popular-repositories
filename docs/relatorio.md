@@ -5,6 +5,24 @@
 
 ---
 
+## Sumário
+
+1. [Introdução](#1-introdução)
+2. [Metodologia](#2-metodologia)
+3. [Questões de Pesquisa e Hipóteses Informais](#3-questões-de-pesquisa-e-hipóteses-informais)
+4. [Resultados da Análise](#4-resultados-da-análise-lab01s03)
+   - 4.1 [RQ01 — Sistemas populares são maduros/antigos?](#41-rq01--sistemas-populares-são-maturoantigos)
+   - 4.2 [RQ02 — Sistemas populares recebem muita contribuição externa?](#42-rq02--sistemas-populares-recebem-muita-contribuição-externa)
+   - 4.3 [RQ03 — Sistemas populares lançam releases com frequência?](#43-rq03--sistemas-populares-lançam-releases-com-frequência)
+   - 4.4 [RQ04 — Sistemas populares são atualizados com frequência?](#44-rq04--sistemas-populares-são-atualizados-com-frequência)
+   - 4.5 [RQ06 — Sistemas possuem alto percentual de issues fechadas?](#45-rq06--sistemas-possuem-alto-percentual-de-issues-fechadas)
+   - 4.6 [Contagem por categoria — Linguagens primárias](#46-contagem-por-categoria--linguagens-primárias)
+   - 4.7 [RQ07 (Bônus) — Linguagem influencia contribuição, releases e atualizações?](#47-rq07-bônus--linguagem-influencia-contribuição-releases-e-atualizações)
+5. [Conclusões e Próximos Passos](#5-conclusões-e-próximos-passos)
+6. [Referências](#6-referências)
+
+---
+
 ## 1. Introdução
 
 Este relatório apresenta a análise dos **1.000 repositórios com maior número de estrelas no GitHub**, coletados via API GraphQL. O objetivo é investigar características comuns a sistemas populares, como maturidade, frequência de contribuições, lançamento de releases, atualização, linguagem de programação e gestão de issues e relacioná-las com o sucesso medido pela popularidade (estrelas).
@@ -248,9 +266,26 @@ Conclusão do bônus: há evidências parciais de que a linguagem está associad
 
 ---
 
-## 5. Conclusões e próximos passos
+## 5. Conclusões e Próximos Passos
 
 - O conjunto analisado (top 1000) tende a ser maduro, ativo e com alta taxa de fechamento de issues.
 - Há diferenças por linguagem: algumas linguagens apresentam medianas mais altas de PRs e releases, sugerindo ecossistemas com mais contribuição externa e versionamento via releases.
 - Próximos passos recomendados: segmentar por tipo de repositório (biblioteca, framework, lista, tutorial), realizar testes estatísticos para comparar distribuições entre linguagens e criar visualizações adicionais que controlem por idade e tipo de projeto.
 
+---
+
+## 6. Referências
+
+[1] GitHub, Inc. *GitHub GraphQL API v4*. Disponível em: https://docs.github.com/en/graphql. Acesso em: março de 2026.
+
+[2] DYER, R.; NGUYEN, H. A.; RAJAN, H.; NGUYEN, T. N. Boa: A Language and Infrastructure for Analyzing Ultra-Large-Scale Software Repositories. In: *Proceedings of the 35th International Conference on Software Engineering (ICSE)*. San Francisco, 2013.
+
+[3] BORGES, H.; HORA, A.; VALENTE, M. T. Understanding the Factors That Impact the Popularity of GitHub Repositories. In: *Proceedings of the 32nd IEEE International Conference on Software Maintenance and Evolution (ICSME)*. Raleigh, 2016.
+
+[4] KALLIAMVAKOU, E.; GOUSIOS, G.; BLINCOE, K.; SINGER, L.; GERMAN, D. M.; DAMIAN, D. The Promises and Perils of Mining GitHub. In: *Proceedings of the 11th Working Conference on Mining Software Repositories (MSR)*. Hyderabad, 2014.
+
+[5] GOUSIOS, G. The GHTorrent Dataset and Tool Suite. In: *Proceedings of the 10th Working Conference on Mining Software Repositories (MSR)*. San Francisco, 2013.
+
+[6] Python Software Foundation. *Python 3 Documentation*. Disponível em: https://docs.python.org/3/. Acesso em: março de 2026.
+
+[7] ReportLab Inc. *ReportLab PDF Library User Guide*. Disponível em: https://www.reportlab.com/docs/reportlab-userguide.pdf. Acesso em: março de 2026.
